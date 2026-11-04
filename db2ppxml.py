@@ -391,7 +391,7 @@ def make_taxonomy_level(etree, pel, level_r):
         level.wr_end()
 
 
-def main():
+def export():
     global out
     out = sys.stdout
     if args.xml_file:
@@ -644,8 +644,9 @@ def main():
     root.wr_end()
 
 
-if __name__ == "__main__":
-    argp = argparse.ArgumentParser(description="Export Sqlite DB to PortfolioPerformance XML file")
+def main():
+    global args
+    argp = argparse.ArgumentParser(description="Export DB to Portfolio Performance XML file")
     argp.add_argument("db", help="input DB (filename/connect string)")
     argp.add_argument("xml_file", nargs="?", help="output XML file (stdout if not provided)")
     argp.add_argument("--dbtype", choices=("sqlite", "pgsql"), default="sqlite", help="select database type")
@@ -658,4 +659,8 @@ if __name__ == "__main__":
         logging.basicConfig(level=logging.DEBUG)
 
     dbhelper.init(args.dbtype, args.db)
+    export()
+
+
+if __name__ == "__main__":
     main()

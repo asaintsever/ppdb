@@ -1,6 +1,6 @@
-# Tools to import/export PortfolioPerformance XML file to/from database
+# Tools to import/export Portfolio Performance XML file to/from database
 
-[PortfolioPerformance](https://github.com/portfolio-performance/portfolio)
+[Portfolio Performance](https://github.com/portfolio-performance/portfolio)
 or "PP" for short, is an OpenSource, advanced, full-featured portfolio/asset
 tracker. It can
 do a lot of things, but definitely not all that you may want. Given that
@@ -14,8 +14,8 @@ by 3rd-party tools, or anything like that.
 
 This project tries to ~~solve~~ address this problem, by providing Python
 scripts to parse this, effectively proprietary, XML format, store the
-data into an SQLite database, and perform a reverse operation - export
-data from such an SQLite database back to the XML format, while achieving
+data into a database (SQLite or PostgreSQL), and perform a reverse operation - export
+data from such a database back to the XML format, while achieving
 as perfect round-trip as possible (meaning that if you import data and
 immediately export, you will get almost no differences comparing to the
 original XML file, and if you change some things in the database, then in
@@ -25,7 +25,7 @@ data in the database, and ensure they correspond to your expectations.
 
 While developing 3rd-party tools is the primary usecase behind this project,
 it also tries to be a "proof of concept" of the idea of storing
-PortfolioPerformance data in the database. To that end, database schema
+Portfolio Performance data in the database. To that end, database schema
 is intended to match internal PP object schema pretty well. This means
 that while writing data manipulation scripts you may need to jump
 thru some extra hops, but potentially opens a possibility to integrate
@@ -43,10 +43,27 @@ or next earnings date - possibilities are limitless.
 
 ## What's in the repository
 
-* `*.sql` - Database schema, one table per file.
-* `ppxml2db_init.py` - Script to create tables in an empty database.
-* `ppxml2db.py` - Script to import XML file into a database.
-* `db2ppxml.py` - Script to export database to XML file.
+* `schema/*.sql` - Database schema, one table per file.
+* `ppxml2db_init.py` - Script to create tables in an empty database
+  (installed as the `ppxml2db-init` command).
+* `ppxml2db.py` - Script to import XML file into a database
+  (installed as the `ppxml2db` command).
+* `db2ppxml.py` - Script to export database to XML file
+  (installed as the `db2ppxml` command).
+* `pyproject.toml` - Project metadata and dependencies, managed with
+  [uv](https://docs.astral.sh/uv/).
+
+The project uses [uv](https://docs.astral.sh/uv/) for dependency and
+virtual environment management. After cloning the repository, run:
+
+```
+uv sync
+```
+
+to create the virtual environment and install dependencies (run
+`uv sync --extra pgsql` if you also want PostgreSQL support).
+Alternatively, you can skip this step - all commands below use `uv run`,
+which sets everything up automatically on first use.
 
 ## Example usage
 
@@ -55,19 +72,19 @@ any modern version should work, at the time of writing, it was tested
 with Python 3.8-3.12.
 
 ppxml2db requires "XML with 'id' attributes" XML variant of
-PortfolioPerformance, as introduced in PortfolioPerformance 0.70.3.
+Portfolio Performance, as introduced in Portfolio Performance 0.70.3.
 
-1. Start PortfolioPerformance. Make sure you see "Welcome" page.
+1. Start Portfolio Performance. Make sure you see "Welcome" page.
 2. On the "Welcome" page, click "Open the Kommer sample file".
 3. "kommer.xml" will open in a new tab.
 4. In the application menu, choose: File -> Save as -> XML with "id" attributes.
 4. Copy the file to this project's directory for easy access.
 5. Create an empty database with all the needed tables:
-   `python3 ppxml2db_init.py kommer.db`
+   `uv run ppxml2db-init kommer.db`
 6. Import the XML into the database:
-   `python3 ppxml2db.py kommer.xml kommer.db`
+   `uv run ppxml2db kommer.xml kommer.db`
 7. Export the database to a new XML file:
-   `python3 db2ppxml.py kommer.db kommer.xml.out`
+   `uv run db2ppxml kommer.db kommer.xml.out`
 8. Ensure that the new file matches the original character-by-character:
    `diff -u kommer.xml kommer.xml.out`
 

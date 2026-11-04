@@ -1,0 +1,16 @@
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# uv
+# uv.lock is committed, do not ignore it
+
+# Databases / logs
+*.db
+*.log
+test/
+

@@ -1,0 +1,32 @@
+[project]
+name = "ppxml2db"
+dynamic = ["version"]
+description = "Import and export Portfolio Performance XML files to/from a SQLite or PostgreSQL database"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+pgsql = [
+    "psycopg[binary]>=3.1",
+]
+
+[project.scripts]
+ppxml2db = "ppxml2db:main"
+ppxml2db-init = "ppxml2db_init:main"
+db2ppxml = "db2ppxml:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["schema"]
+py-modules = ["ppxml2db", "ppxml2db_init", "db2ppxml", "dbhelper", "version"]
+
+[tool.setuptools.package-data]
+schema = ["*.sql"]
+
+[tool.setuptools.dynamic]
+version = { attr = "version.__version__" }

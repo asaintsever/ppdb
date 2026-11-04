@@ -1,4 +1,4 @@
-PYTHON = python3
+PYTHON = uv run
 DB = pp.db
 
 
@@ -13,15 +13,14 @@ reload-data:
 	make all
 
 .create-db:
-	python3 ppxml2db_init.py --recreate $(DB)
+	$(PYTHON) ppxml2db-init --recreate $(DB)
 	touch $@
 
 clean:
-	-rm -f .[a-z]*
+	-rm -f .create-db $(DB)
 
-
-# It appears that sqlite3 dump CSV by default with CRLF line endings. Use
-# ".separator" directive to override that.
+# It appears that sqlite3 dump CSV by default with CRLF line
+# endings. Use ".separator" directive to override that.
 dump:
 	for db in `echo ".tables" |  sqlite3 $(DB)`; do \
 	    echo -e ".mode csv\n.separator , \\\n\n select * from $$db;" | sqlite3 $(DB) >$$db.csv; \
