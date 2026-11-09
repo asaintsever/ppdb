@@ -300,6 +300,7 @@ def make_portfolio(etree, pel, uuid, el_name="portfolio"):
         port_r = dbhelper.select("account", where="uuid='%s'" % uuid)[0]
         make_prop(el, port_r, "uuid")
         make_prop(el, port_r, "name")
+        make_prop(el, port_r, "note")
         make_prop(el, port_r, "isRetired", conv=as_bool)
         refacc_r = dbhelper.select("account", where="uuid='%s'" % port_r["referenceAccount"])[0]
         make_account(etree, el, refacc_r, el_name="referenceAccount")
@@ -345,6 +346,10 @@ def quote_text(s):
         (">", "&gt;"),
         ('"', "&quot;"),
         ("'", "&apos;"),
+        # Escape CR so it survives re-parsing: XML parsers normalise raw
+        # CR/CRLF in the document to LF, but character references are kept
+        # as-is, so &#xd; round-trips to an actual CR.
+        ("\r", "&#xd;"),
     )
     for p, r in pats:
         s = s.replace(p, r)
