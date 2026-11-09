@@ -52,6 +52,8 @@ or next earnings date - possibilities are limitless.
   (installed as the `db2ppxml` command).
 * `pyproject.toml` - Project metadata and dependencies, managed with
   [uv](https://docs.astral.sh/uv/).
+* `Makefile` - Convenient targets wrapping the commands described
+  below (run `make help` to see the full list).
 
 The project uses [uv](https://docs.astral.sh/uv/) for dependency and
 virtual environment management. After cloning the repository, run:
@@ -62,8 +64,8 @@ uv sync
 
 to create the virtual environment and install dependencies (run
 `uv sync --extra pgsql` if you also want PostgreSQL support).
-Alternatively, you can skip this step - all commands below use `uv run`,
-which sets everything up automatically on first use.
+Alternatively, you can skip this step - all `make` targets use
+`uv run`, which sets everything up automatically on first use.
 
 ## Example usage
 
@@ -74,27 +76,38 @@ with Python 3.8-3.12.
 ppxml2db requires "XML with 'id' attributes" XML variant of
 Portfolio Performance, as introduced in Portfolio Performance 0.70.3.
 
+All operations are conveniently wrapped in `make` targets
+(run `make help` to list them). The database and XML files are
+configurable, e.g. to use `kommer.db` instead of the default `pp.db`,
+run `make DB=kommer.db ...` on the corresponding targets.
+
 1. Start Portfolio Performance. Make sure you see "Welcome" page.
 2. On the "Welcome" page, click "Open the Kommer sample file".
 3. "kommer.xml" will open in a new tab.
 4. In the application menu, choose: File -> Save as -> XML with "id" attributes.
 4. Copy the file to this project's directory for easy access.
 5. Create an empty database with all the needed tables:
-   `uv run ppxml2db-init kommer.db`
+   `make init`
 6. Import the XML into the database:
-   `uv run ppxml2db kommer.xml kommer.db`
+   `make import`
 7. Export the database to a new XML file:
-   `uv run db2ppxml kommer.db kommer.xml.out`
+   `make export`
 8. Ensure that the new file matches the original character-by-character:
-   `diff -u kommer.xml kommer.xml.out`
+   `make diff`
 
 Now let's do something pretty simple, yet useful, and already something
 which PP itself doesn't do: show how many securities are in a portfolio:
 
 ```
-echo "SELECT COUNT(*) FROM security;" | sqlite3 kommer.db
+echo "SELECT COUNT(*) FROM security;" | sqlite3 pp.db
 16
 ```
+
+To start over with a completely fresh database, use `make reload-data`
+(it removes the database and re-runs `make all`).
+
+To get per-table CSV dumps of the database for further analysis,
+use `make dump`.
 
 ## Status and known issues
 
