@@ -3,7 +3,7 @@ name = "ppxml2db"
 dynamic = ["version"]
 description = "Import and export Portfolio Performance XML files to/from a SQLite or PostgreSQL database"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.9"
 dependencies = []
 

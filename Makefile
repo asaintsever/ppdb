@@ -3,7 +3,7 @@
 .EXPORT_ALL_VARIABLES: ; # Send all vars to shell
 .DEFAULT: help # Running Make without target will run the help target
 
-.PHONY: help init clean all import export diff dump reload-data tables .create-db
+.PHONY: help init clean all import export diff dump reload-data tables .create-db wheel
 
 # Run commands via `uv run`, which sets up the virtual environment
 # and dependencies on demand, so `uv sync` can be skipped.
@@ -47,14 +47,21 @@ export: ## Export the database ($(DB)) to a new XML file ($(OUT))
 diff: ## Verify round-trip: diff original XML ($(XML)) vs exported ($(OUT))
 	diff -u $(XML) $(OUT)
 
+# Build a Python wheel in dist/ for easy distribution and install.
+# (Note: `uv build` runs in an isolated build environment, so it is
+# called directly instead of via `$(PYTHON)`.)
+wheel: ## Build a Python wheel (dist/ppxml2db-*.whl)
+	uv build --wheel
+
 # Prerequisite of init: actually runs the schema creation,
 # guarded by the .create-db stamp file.
 .create-db:
 	$(PYTHON) ppxml2db-init --recreate $(DB)
 	touch $@
 
-clean: ## Remove the database ($(DB)) and the build stamp
+clean: ## Remove the database ($(DB)), the build stamp and build artifacts
 	-rm -f .create-db $(DB)
+	-rm -rf dist build ppxml2db.egg-info
 
 # It appears that sqlite3 dump CSV by default with CRLF line
 # endings. Use ".separator" directive to override that.

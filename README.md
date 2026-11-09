@@ -109,6 +109,11 @@ To start over with a completely fresh database, use `make reload-data`
 To get per-table CSV dumps of the database for further analysis,
 use `make dump`.
 
+To package the project for distribution, use `make wheel`, which
+creates `dist/ppxml2db-*.whl` installable via
+`pip install dist/ppxml2db-*.whl` (add the `pgsql` extra for
+PostgreSQL support).
+
 ## Status and known issues
 
 ppxml2db is an experimental project and work-in-progress. A lot of effort
