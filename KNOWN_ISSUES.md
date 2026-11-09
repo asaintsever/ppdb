@@ -1,13 +1,6 @@
 # Status and known issues
 
-ppdb is an experimental project and work-in-progress. A lot of effort
-went into achieving as perfect round-trip as realistically possible, and
-you should always use this capability to confirm that there's no loss or
-unexpected results on your data. The formerly unsupported "Investment
-Plans", "Exchange Rates" and "Consumer Price Index" objects are now
-handled: investment plans via the dedicated `plan` / `plan_transaction`
-tables, and exchange rates / consumer price index via the generic
-`configurationSets` settings mechanism. Remaining known issues and TODOs:
+Remaining known issues and TODOs:
 
 * For newly created securities, PP may not output empty `<events/>` element,
   while ppdb always does. Or to put it differently, PP may either have
