@@ -1,6 +1,7 @@
 import sys
 import argparse
 import logging
+from importlib.resources import files
 
 from version import __version__
 import dbhelper
@@ -47,24 +48,9 @@ def drop_table(table):
     dbhelper.execute_dml(sql)
 
 
-def main(args):
-    for table in SCHEMA:
-        with open(table + ".sql") as f:
-            sql = f.read()
-        if args.recreate:
-            drop_table(table)
-
-        if args.dbtype == "pgsql":
-            sql = sql.replace(
-                "INTEGER NOT NULL PRIMARY KEY",
-                "SERIAL NOT NULL PRIMARY KEY"
-            )
-
-        dbhelper.executescript(sql)
-
-
-if __name__ == "__main__":
-    argp = argparse.ArgumentParser(description="Initialize database for ppxml2db")
+def main():
+    global args
+    argp = argparse.ArgumentParser(description="Initialize database for ppdb")
     argp.add_argument("db", help="output DB (filename/connect string)")
     argp.add_argument("--dbtype", choices=("sqlite", "pgsql"), default="sqlite", help="select database type")
     argp.add_argument("--recreate", action="store_true", help="delete existing tables")
@@ -78,7 +64,23 @@ if __name__ == "__main__":
 
     dbhelper.init(args.dbtype, args.db)
 
-    main(args)
+    for table in SCHEMA:
+        with (files("schema") / (table + ".sql")).open() as f:
+            sql = f.read()
+        if args.recreate:
+            drop_table(table)
+
+        if args.dbtype == "pgsql":
+            sql = sql.replace(
+                "INTEGER NOT NULL PRIMARY KEY",
+                "SERIAL NOT NULL PRIMARY KEY"
+            )
+
+        dbhelper.executescript(sql)
 
     if not args.dry_run:
         dbhelper.commit()
+
+
+if __name__ == "__main__":
+    main()

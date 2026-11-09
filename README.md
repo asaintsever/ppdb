@@ -1,6 +1,11 @@
-# Tools to import/export PortfolioPerformance XML file to/from database
+# ppdb — Portfolio Performance XML ↔ database tools
 
-[PortfolioPerformance](https://github.com/portfolio-performance/portfolio)
+**formerly ppxml2db** — the project has been renamed to **ppdb**.
+The old `ppxml2db`, `ppxml2db-init`, and `db2ppxml` commands still work
+as thin, deprecation-warned shims that forward to the new commands
+(`ppdb-import`, `ppdb-init`, `ppdb-export`).
+
+[Portfolio Performance](https://github.com/portfolio-performance/portfolio)
 or "PP" for short, is an OpenSource, advanced, full-featured portfolio/asset
 tracker. It can
 do a lot of things, but definitely not all that you may want. Given that
@@ -14,8 +19,8 @@ by 3rd-party tools, or anything like that.
 
 This project tries to ~~solve~~ address this problem, by providing Python
 scripts to parse this, effectively proprietary, XML format, store the
-data into an SQLite database, and perform a reverse operation - export
-data from such an SQLite database back to the XML format, while achieving
+data into a database (SQLite or PostgreSQL), and perform a reverse operation - export
+data from such a database back to the XML format, while achieving
 as perfect round-trip as possible (meaning that if you import data and
 immediately export, you will get almost no differences comparing to the
 original XML file, and if you change some things in the database, then in
@@ -25,7 +30,7 @@ data in the database, and ensure they correspond to your expectations.
 
 While developing 3rd-party tools is the primary usecase behind this project,
 it also tries to be a "proof of concept" of the idea of storing
-PortfolioPerformance data in the database. To that end, database schema
+Portfolio Performance data in the database. To that end, database schema
 is intended to match internal PP object schema pretty well. This means
 that while writing data manipulation scripts you may need to jump
 thru some extra hops, but potentially opens a possibility to integrate
@@ -43,52 +48,92 @@ or next earnings date - possibilities are limitless.
 
 ## What's in the repository
 
-* `*.sql` - Database schema, one table per file.
-* `ppxml2db_init.py` - Script to create tables in an empty database.
-* `ppxml2db.py` - Script to import XML file into a database.
-* `db2ppxml.py` - Script to export database to XML file.
+* `schema/*.sql` - Database schema, one table per file.
+* `ppdb_init.py` - Script to create tables in an empty database
+  (installed as the `ppdb-init` command; old name `ppxml2db-init`
+  still works as a deprecation shim).
+* `ppdb_import.py` - Script to import XML file into a database
+  (installed as the `ppdb-import` command; old name `ppxml2db`
+  still works as a deprecation shim).
+* `ppdb_export.py` - Script to export database to XML file
+  (installed as the `ppdb-export` command; old name `db2ppxml`
+  still works as a deprecation shim).
+* `ppdb_shim.py` - Thin backward-compatibility shims that forward the
+  old command names to the new ones and print a deprecation warning.
+* `pyproject.toml` - Project metadata and dependencies, managed with
+  [uv](https://docs.astral.sh/uv/).
+* `Makefile` - Convenient targets wrapping the commands described
+  below (run `make help` to see the full list).
+
+The project uses [uv](https://docs.astral.sh/uv/) for dependency and
+virtual environment management. After cloning the repository, run:
+
+```
+uv sync
+```
+
+to create the virtual environment and install dependencies (run
+`uv sync --extra pgsql` if you also want PostgreSQL support).
+Alternatively, you can skip this step - all `make` targets use
+`uv run`, which sets everything up automatically on first use.
 
 ## Example usage
 
-The ppxml2db tools are written in [Python3](https://www.python.org),
+The ppdb tools are written in [Python3](https://www.python.org),
 any modern version should work, at the time of writing, it was tested
 with Python 3.8-3.12.
 
-ppxml2db requires "XML with 'id' attributes" XML variant of
-PortfolioPerformance, as introduced in PortfolioPerformance 0.70.3.
+ppdb requires "XML with 'id' attributes" XML variant of
+Portfolio Performance, as introduced in Portfolio Performance 0.70.3.
 
-1. Start PortfolioPerformance. Make sure you see "Welcome" page.
+All operations are conveniently wrapped in `make` targets
+(run `make help` to list them). The database and XML files are
+configurable, e.g. to use `kommer.db` instead of the default `pp.db`,
+run `make DB=kommer.db ...` on the corresponding targets.
+
+1. Start Portfolio Performance. Make sure you see "Welcome" page.
 2. On the "Welcome" page, click "Open the Kommer sample file".
 3. "kommer.xml" will open in a new tab.
 4. In the application menu, choose: File -> Save as -> XML with "id" attributes.
 4. Copy the file to this project's directory for easy access.
 5. Create an empty database with all the needed tables:
-   `python3 ppxml2db_init.py kommer.db`
+   `make init`
 6. Import the XML into the database:
-   `python3 ppxml2db.py kommer.xml kommer.db`
+   `make import`
 7. Export the database to a new XML file:
-   `python3 db2ppxml.py kommer.db kommer.xml.out`
+   `make export`
 8. Ensure that the new file matches the original character-by-character:
-   `diff -u kommer.xml kommer.xml.out`
+   `make diff`
 
 Now let's do something pretty simple, yet useful, and already something
 which PP itself doesn't do: show how many securities are in a portfolio:
 
 ```
-echo "SELECT COUNT(*) FROM security;" | sqlite3 kommer.db
+echo "SELECT COUNT(*) FROM security;" | sqlite3 pp.db
 16
 ```
 
+To start over with a completely fresh database, use `make reload-data`
+(it removes the database and re-runs `make all`).
+
+To get per-table CSV dumps of the database for further analysis,
+use `make dump`.
+
+To package the project for distribution, use `make wheel`, which
+creates `dist/ppdb-*.whl` installable via
+`pip install dist/ppdb-*.whl` (add the `pgsql` extra for
+PostgreSQL support).
+
 ## Status and known issues
 
-ppxml2db is an experimental project and work-in-progress. A lot of effort
+ppdb is an experimental project and work-in-progress. A lot of effort
 went into achieving as perfect round-trip as realistically possible, and
 you should always use this capability to confirm that there's no loss or
 unexpected results on your data. Some of the known issues an TODOs are:
 
 * For newly created securities, PP may not output empty `<events/>` element,
-  while ppxml2db always does. Or to put it differently, PP may either have
-  empty `<events/>` element, or not have it at all, while ppxml2db always
+  while ppdb always does. Or to put it differently, PP may either have
+  empty `<events/>` element, or not have it at all, while ppdb always
   outputs it. This is a known source of differences in output during
   round-tripping. This is rooted in details of internal representation:
   on the PP level, events may be either a null value, or an empty list.
@@ -98,7 +143,7 @@ unexpected results on your data. Some of the known issues an TODOs are:
   this unfortunate but harmless case of round-tripping diff is left alone.
   It might be possible to work that around to achieve perfect round-tripping,
   by storing additional data in the database, but that would contradict
-  one of the ppxml2db's goals - to match as close as possible PP's object
+  one of the ppdb's goals - to match as close as possible PP's object
   schema, without questionable additions and definitely without adhoc
   workarounds.
 * "Investment Plans", "Exchange Rates", "Consumer Price Index" objects

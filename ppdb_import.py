@@ -7,7 +7,7 @@ import json
 import logging
 import os.path
 
-import lxml.etree as ET
+import xml.etree.ElementTree as ET
 
 from version import __version__
 import dbhelper
@@ -424,8 +424,13 @@ class PortfolioPerformanceXML2DB:
     def cur_uuid(self):
         return self.container_stack[-1][1]
 
+    def parent(self):
+        # Parent of the element whose "end" event is currently being processed
+        return self.el_pstack[-1]
+
     def iterparse(self):
         self.el_stack = []
+        self.el_pstack = []
         self.container_stack = []
         self.cur_xmlid = None
         self.id2uuid_map = {}
@@ -440,6 +445,7 @@ class PortfolioPerformanceXML2DB:
             self.el_order += 1
             if event == "start":
                 self.el_stack.append(el.tag)
+                self.el_pstack.append(el)
                 if el.tag in ("security", "account", "referenceAccount", "accountFrom", "accountTo", "portfolio", "portfolioFrom", "portfolioTo"):
                     self.cur_xmlid = el.get("id")
                     if self.cur_xmlid is not None:
@@ -458,6 +464,7 @@ class PortfolioPerformanceXML2DB:
             elif event == "end":
                 assert self.el_stack[-1] == el.tag
                 self.el_stack.pop()
+                self.el_pstack.pop()
                 if el.tag in ("uuid", "id"):
                     if  self.container_stack and self.container_stack[-1][1] is None:
                         self.container_stack[-1][1] = el.text
@@ -508,7 +515,7 @@ class PortfolioPerformanceXML2DB:
 
                 elif el.tag == "accountTransaction":
                     if el.get("id"):
-                        parent = el.getparent()
+                        parent = self.parent()
                         uuid = self.uuid(parent.find("account"))
                         assert self.is_account_tag(self.uuid2ctr_map[uuid]), self.uuid2ctr_map[uuid]
                         self.handle_xact("account", uuid, el, 0)
@@ -523,14 +530,14 @@ class PortfolioPerformanceXML2DB:
 
                 elif el.tag in ("portfolioTransaction",):
                     if el.get("id"):
-                        parent = el.getparent()
+                        parent = self.parent()
                         uuid = self.uuid(parent.find("portfolio"))
                         assert self.uuid2ctr_map[uuid].startswith("portfolio"), self.uuid2ctr_map[uuid]
                         self.handle_xact("portfolio", uuid, el, 0)
 
                 elif el.tag == "transactionTo":
                     if el.get("id"):
-                        parent = el.getparent()
+                        parent = self.parent()
                         assert parent.tag == "crossEntry"
                         if parent.get("class") == "account-transfer":
                             what = "account"
@@ -548,7 +555,7 @@ class PortfolioPerformanceXML2DB:
                         self.handle_xact(what, uuid, el, 0)
                 elif el.tag == "transactionFrom":
                     if el.get("id"):
-                        parent = el.getparent()
+                        parent = self.parent()
                         assert parent.tag == "crossEntry"
                         if parent.get("class") == "account-transfer":
                             what = "account"
@@ -608,8 +615,9 @@ class PortfolioPerformanceXML2DB:
                         el.text = el.tail = None
 
 
-if __name__ == "__main__":
-    argp = argparse.ArgumentParser(description="Import PortfolioPerformance XML file to Sqlite DB")
+def main():
+    global args
+    argp = argparse.ArgumentParser(description="Import Portfolio Performance XML file to DB")
     argp.add_argument("xml_file", help="input XML file")
     argp.add_argument("db", help="output DB (filename/connect string)")
     argp.add_argument("--dbtype", choices=("sqlite", "pgsql"), default="sqlite", help="select database type")
@@ -630,3 +638,7 @@ if __name__ == "__main__":
 
     if not args.dry_run:
         dbhelper.commit()
+
+
+if __name__ == "__main__":
+    main()
