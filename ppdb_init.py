@@ -50,7 +50,7 @@ def drop_table(table):
 
 def main():
     global args
-    argp = argparse.ArgumentParser(description="Initialize database for ppxml2db")
+    argp = argparse.ArgumentParser(description="Initialize database for ppdb")
     argp.add_argument("db", help="output DB (filename/connect string)")
     argp.add_argument("--dbtype", choices=("sqlite", "pgsql"), default="sqlite", help="select database type")
     argp.add_argument("--recreate", action="store_true", help="delete existing tables")

@@ -1,4 +1,9 @@
-# Tools to import/export Portfolio Performance XML file to/from database
+# ppdb — Portfolio Performance XML ↔ database tools
+
+**formerly ppxml2db** — the project has been renamed to **ppdb**.
+The old `ppxml2db`, `ppxml2db-init`, and `db2ppxml` commands still work
+as thin, deprecation-warned shims that forward to the new commands
+(`ppdb-import`, `ppdb-init`, `ppdb-export`).
 
 [Portfolio Performance](https://github.com/portfolio-performance/portfolio)
 or "PP" for short, is an OpenSource, advanced, full-featured portfolio/asset
@@ -44,12 +49,17 @@ or next earnings date - possibilities are limitless.
 ## What's in the repository
 
 * `schema/*.sql` - Database schema, one table per file.
-* `ppxml2db_init.py` - Script to create tables in an empty database
-  (installed as the `ppxml2db-init` command).
-* `ppxml2db.py` - Script to import XML file into a database
-  (installed as the `ppxml2db` command).
-* `db2ppxml.py` - Script to export database to XML file
-  (installed as the `db2ppxml` command).
+* `ppdb_init.py` - Script to create tables in an empty database
+  (installed as the `ppdb-init` command; old name `ppxml2db-init`
+  still works as a deprecation shim).
+* `ppdb_import.py` - Script to import XML file into a database
+  (installed as the `ppdb-import` command; old name `ppxml2db`
+  still works as a deprecation shim).
+* `ppdb_export.py` - Script to export database to XML file
+  (installed as the `ppdb-export` command; old name `db2ppxml`
+  still works as a deprecation shim).
+* `ppdb_shim.py` - Thin backward-compatibility shims that forward the
+  old command names to the new ones and print a deprecation warning.
 * `pyproject.toml` - Project metadata and dependencies, managed with
   [uv](https://docs.astral.sh/uv/).
 * `Makefile` - Convenient targets wrapping the commands described
@@ -69,11 +79,11 @@ Alternatively, you can skip this step - all `make` targets use
 
 ## Example usage
 
-The ppxml2db tools are written in [Python3](https://www.python.org),
+The ppdb tools are written in [Python3](https://www.python.org),
 any modern version should work, at the time of writing, it was tested
 with Python 3.8-3.12.
 
-ppxml2db requires "XML with 'id' attributes" XML variant of
+ppdb requires "XML with 'id' attributes" XML variant of
 Portfolio Performance, as introduced in Portfolio Performance 0.70.3.
 
 All operations are conveniently wrapped in `make` targets
@@ -110,20 +120,20 @@ To get per-table CSV dumps of the database for further analysis,
 use `make dump`.
 
 To package the project for distribution, use `make wheel`, which
-creates `dist/ppxml2db-*.whl` installable via
-`pip install dist/ppxml2db-*.whl` (add the `pgsql` extra for
+creates `dist/ppdb-*.whl` installable via
+`pip install dist/ppdb-*.whl` (add the `pgsql` extra for
 PostgreSQL support).
 
 ## Status and known issues
 
-ppxml2db is an experimental project and work-in-progress. A lot of effort
+ppdb is an experimental project and work-in-progress. A lot of effort
 went into achieving as perfect round-trip as realistically possible, and
 you should always use this capability to confirm that there's no loss or
 unexpected results on your data. Some of the known issues an TODOs are:
 
 * For newly created securities, PP may not output empty `<events/>` element,
-  while ppxml2db always does. Or to put it differently, PP may either have
-  empty `<events/>` element, or not have it at all, while ppxml2db always
+  while ppdb always does. Or to put it differently, PP may either have
+  empty `<events/>` element, or not have it at all, while ppdb always
   outputs it. This is a known source of differences in output during
   round-tripping. This is rooted in details of internal representation:
   on the PP level, events may be either a null value, or an empty list.
@@ -133,7 +143,7 @@ unexpected results on your data. Some of the known issues an TODOs are:
   this unfortunate but harmless case of round-tripping diff is left alone.
   It might be possible to work that around to achieve perfect round-tripping,
   by storing additional data in the database, but that would contradict
-  one of the ppxml2db's goals - to match as close as possible PP's object
+  one of the ppdb's goals - to match as close as possible PP's object
   schema, without questionable additions and definitely without adhoc
   workarounds.
 * "Investment Plans", "Exchange Rates", "Consumer Price Index" objects

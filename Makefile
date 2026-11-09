@@ -39,10 +39,10 @@ reload-data: ## Recreate the database ($(DATA)) and re-import the XML data
 	make all
 
 import: ## Import $(XML) into the database ($(DB))
-	$(PYTHON) ppxml2db $(XML) $(DB)
+	$(PYTHON) ppdb_import.py $(XML) $(DB)
 
 export: ## Export the database ($(DB)) to a new XML file ($(OUT))
-	$(PYTHON) db2ppxml $(DB) $(OUT)
+	$(PYTHON) ppdb_export.py $(DB) $(OUT)
 
 diff: ## Verify round-trip: diff original XML ($(XML)) vs exported ($(OUT))
 	diff -u $(XML) $(OUT)
@@ -50,18 +50,18 @@ diff: ## Verify round-trip: diff original XML ($(XML)) vs exported ($(OUT))
 # Build a Python wheel in dist/ for easy distribution and install.
 # (Note: `uv build` runs in an isolated build environment, so it is
 # called directly instead of via `$(PYTHON)`.)
-wheel: ## Build a Python wheel (dist/ppxml2db-*.whl)
+wheel: ## Build a Python wheel (dist/ppdb-*.whl)
 	uv build --wheel
 
 # Prerequisite of init: actually runs the schema creation,
 # guarded by the .create-db stamp file.
 .create-db:
-	$(PYTHON) ppxml2db-init --recreate $(DB)
+	$(PYTHON) ppdb_init.py --recreate $(DB)
 	touch $@
 
 clean: ## Remove the database ($(DB)), the build stamp and build artifacts
 	-rm -f .create-db $(DB)
-	-rm -rf dist build ppxml2db.egg-info
+	-rm -rf dist build ppdb.egg-info ppxml2db.egg-info
 
 # It appears that sqlite3 dump CSV by default with CRLF line
 # endings. Use ".separator" directive to override that.

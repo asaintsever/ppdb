@@ -1,5 +1,5 @@
 [project]
-name = "ppxml2db"
+name = "ppdb"
 dynamic = ["version"]
 description = "Import and export Portfolio Performance XML files to/from a SQLite or PostgreSQL database"
 readme = "README.md"
@@ -13,9 +13,12 @@ pgsql = [
 ]
 
 [project.scripts]
-ppxml2db = "ppxml2db:main"
-ppxml2db-init = "ppxml2db_init:main"
-db2ppxml = "db2ppxml:main"
+ppdb-init = "ppdb_init:main"
+ppdb-import = "ppdb_import:main"
+ppdb-export = "ppdb_export:main"
+ppxml2db = "ppdb_shim:main"
+ppxml2db-init = "ppdb_shim:init_main"
+db2ppxml = "ppdb_shim:export_main"
 
 [build-system]
 requires = ["setuptools>=61"]
@@ -23,7 +26,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["schema"]
-py-modules = ["ppxml2db", "ppxml2db_init", "db2ppxml", "dbhelper", "version"]
+py-modules = ["ppdb_import", "ppdb_export", "ppdb_init", "ppdb_shim", "dbhelper", "version"]
 
 [tool.setuptools.package-data]
 schema = ["*.sql"]
