@@ -3,7 +3,11 @@
 ppdb is an experimental project and work-in-progress. A lot of effort
 went into achieving as perfect round-trip as realistically possible, and
 you should always use this capability to confirm that there's no loss or
-unexpected results on your data. Some of the known issues an TODOs are:
+unexpected results on your data. The formerly unsupported "Investment
+Plans", "Exchange Rates" and "Consumer Price Index" objects are now
+handled: investment plans via the dedicated `plan` / `plan_transaction`
+tables, and exchange rates / consumer price index via the generic
+`configurationSets` settings mechanism. Remaining known issues and TODOs:
 
 * For newly created securities, PP may not output empty `<events/>` element,
   while ppdb always does. Or to put it differently, PP may either have
@@ -20,8 +24,5 @@ unexpected results on your data. Some of the known issues an TODOs are:
   one of the ppdb's goals - to match as close as possible PP's object
   schema, without questionable additions and definitely without adhoc
   workarounds.
-* "Investment Plans", "Exchange Rates", "Consumer Price Index" objects
-  aren't supported (nothing impossible, I just didn't have a chance to
-  see these objects in use).
 * Various features / additional properties of other objects may be not
   supported.
