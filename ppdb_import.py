@@ -603,7 +603,11 @@ class PortfolioPerformanceXML2DB:
                     preserve = True
                 elif self.el_stack and self.el_stack[-1] == "watchlist" and el.tag == "securities":
                     preserve = True
-                elif self.container_stack and self.container_stack[-1][0] in ("security", "account", "portfolio") and el.tag == "attributes":
+                elif self.container_stack and self.container_stack[-1][0] in (
+                    "security", "account", "portfolio",
+                    "referenceAccount", "accountFrom", "accountTo",
+                    "portfolioFrom", "portfolioTo",
+                ) and el.tag == "attributes":
                     preserve = True
 
                 if not preserve:
