@@ -11,7 +11,9 @@ round-trip.
 
 ## Table of contents
 
-- [Why this exists](#why-this-exists)
+- [PPDB — Portfolio Performance XML ↔ database tools](#ppdb--portfolio-performance-xml--database-tools)
+  - [Table of contents](#table-of-contents)
+  - [Why this exists](#why-this-exists)
   - [What you can do with it](#what-you-can-do-with-it)
   - [Installation](#installation)
   - [Quick start](#quick-start)
@@ -83,8 +85,25 @@ to create the virtual environment and install dependencies
 ## Quick start
 
 All operations are conveniently wrapped in `make` targets (run `make help` to list them).
-The database and XML files are configurable — e.g. to use `kommer.db` instead of the
-default `pp.db`, add `DB=kommer.db` to the corresponding targets.
+
+The database and XML files are configurable via the `DB` and `XML` `make` variables,
+which default to `pp.db` and `kommer.xml`. Override them on the `make` command line
+(or as environment variables) — either per target:
+
+```
+make import DB=main.db XML=main.xml
+make export DB=main.db XML=main.xml
+```
+
+or once for the whole session:
+
+```
+export DB=main.db XML=main.xml
+make all
+```
+
+Note that `make export` always writes to `<XML>.out` (here `main.xml.out`), and
+`make diff` compares that file against the original `$(XML)`.
 
 ### 1. Get a sample PP file
 

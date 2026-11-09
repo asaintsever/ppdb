@@ -10,6 +10,7 @@
 PYTHON = uv run
 
 # SQLite database file used for all operations.
+# Override on the make command line: make <target> DB=my.db
 DB = pp.db
 
 # $(DATA) is simply the database file ($(DB)): reload-data removes it
@@ -18,14 +19,19 @@ DB = pp.db
 DATA = $(DB)
 
 # Source Portfolio Performance XML file (the "XML with 'id'
-# attributes" variant, as produced by PP >= 0.70.3).
-XML = kommen.xml
+# attributes" variant, as produced by PP >= 0.70.3). export writes to $(XML).out.
+# Override on the make command line: make <target> XML=my.xml
+XML = kommer.xml
 
 # Output XML file produced by the `export` target.
 OUT = $(XML).out
 
 help: ## Show Help
 	grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	echo
+	echo "Configurable files (override on the command line or as env vars, e.g. 'make import DB=my.db XML=my.xml')"
+	echo "  DB   database file (default: $(DB))"
+	echo "  XML  source PP XML file (default: $(XML)); export writes to $(XML).out"
 
 all: init import ## Create the database and import the XML data
 

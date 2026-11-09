@@ -12,6 +12,7 @@ __pycache__/
 # Databases / logs
 *.db
 *.log
+.create-db
 build/
 dist/
 test/
