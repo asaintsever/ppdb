@@ -69,6 +69,8 @@ directions:
 ppdb is written in [Python 3](https://www.python.org). It requires the **XML with 'id' attributes** XML variant
 of Portfolio Performance, introduced in PP 0.70.3.
 
+![](./pp-save-xml-with-id.png)
+
 The project uses [uv](https://docs.astral.sh/uv/) for dependency and virtual environment
 management. After cloning the repository, run:
 
